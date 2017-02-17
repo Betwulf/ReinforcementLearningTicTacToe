@@ -49,6 +49,7 @@ namespace TestTicTac
             }
         }
 
+
         // seek command line user input in a game between man and machine.
         private int GetUserMove(BoardState state)
         {

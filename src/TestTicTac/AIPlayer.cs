@@ -78,23 +78,23 @@ namespace TestTicTac
             {
                 return -1;
             }
-            var r = RandomNumberGenerator.Create();           
-            var explore = r.GetDouble();
+            // decide whether to explore a new random move, or pick the best known (greedy) move...
+            var explore = RandomNumberGenerator.Create().GetDouble();
             if (explore < ExploreRate)
             {
-                if (printMoves) Console.WriteLine($"Player {PlayerSymbol}: Random move");
                 // then pick a move at random
+                if (printMoves) Console.WriteLine($"Player {PlayerSymbol}: Random move");
                 var rMoves = NextMoveTree[hash];
                 rMoves.Shuffle();
-                int pick = 0; // shuffling does the random now.
-                Learn(rMoves[pick].estimate);
-                LastMove = rMoves[pick];
-                return rMoves[pick].pos;
+                var randomMove = rMoves[0]; // shuffling randomizes the list, so just pick the first item in the list.
+                Learn(randomMove.estimate);
+                LastMove = randomMove;
+                return randomMove.pos;
             }
 
-            // otherwise pick the best we know
+            // otherwise pick the best move we know of (Greedy)
             var moves = NextMoveTree[hash];
-            moves.Shuffle();
+            moves.Shuffle(); // this is an important step to randomly pick moves of equal probability, otherwise we would always pick the first value
             var topMove = moves.First(y => y.estimate == moves.Max(x => x.estimate));
             if (printMoves)
             {
@@ -116,7 +116,6 @@ namespace TestTicTac
                 var moveEstimate = chosenEstimate;
                 var oldEstimate = LastMove.estimate;
                 LastMove.estimate = oldEstimate + LearningRate * (moveEstimate - oldEstimate);
-                //Console.WriteLine($"Player {PlayerSymbol} updated estimate from {oldEstimate} to {LastMove.estimate}");
             }
         }
 
@@ -129,6 +128,7 @@ namespace TestTicTac
             {
                 if (winner == PlayerSymbol)
                 {
+                    // winner winner chicken dinner!
                     Learn(1.0);
                 }
                 else
